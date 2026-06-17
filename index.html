@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluent Living — Procurement</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --primary-light: #2d5a8e;
+    --accent: #e8a020;
+    --accent-light: #f5c060;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --border: #e0e4ef;
+    --text: #2c3e50;
+    --text-muted: #7f8c9a;
+    --sidebar-width: 240px;
+    --header-height: 60px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* ── LOGIN ── */
+  #login-page { display:flex; align-items:center; justify-content:center; min-height:100vh; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); }
+  .login-box { background: white; border-radius: 16px; padding: 48px 40px; width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .login-logo { text-align:center; margin-bottom:32px; }
+  .login-logo h1 { color: var(--primary); font-size: 22px; font-weight:700; margin-top:8px; }
+  .login-logo p { color: var(--text-muted); font-size:13px; margin-top:4px; }
+  .form-group { margin-bottom:18px; }
+  .form-group label { display:block; font-weight:600; margin-bottom:6px; color:var(--text); font-size:13px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:14px; transition:border-color 0.2s; outline:none; background:white; color:var(--text);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary-light); }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; text-decoration:none; }
+  .btn-primary { background:var(--primary); color:white; }
+  .btn-primary:hover { background:var(--primary-light); }
+  .btn-accent { background:var(--accent); color:white; }
+  .btn-accent:hover { background:var(--accent-light); color:var(--text); }
+  .btn-success { background:var(--success); color:white; }
+  .btn-danger { background:var(--danger); color:white; }
+  .btn-outline { background:transparent; border:1.5px solid var(--primary); color:var(--primary); }
+  .btn-sm { padding:6px 14px; font-size:13px; }
+  .btn-full { width:100%; justify-content:center; }
+  .error-msg { color:var(--danger); font-size:13px; margin-top:8px; display:none; }
+
+  /* ── APP SHELL ── */
+  #app { display:none; }
+  .app-header { position:fixed; top:0; left:0; right:0; height:var(--header-height); background:var(--primary); color:white; display:flex; align-items:center; padding:0 20px; z-index:100; gap:16px; }
+  .app-header .logo { font-weight:700; font-size:16px; }
+  .app-header .header-right { margin-left:auto; display:flex; align-items:center; gap:16px; }
+  .app-header .user-info { font-size:13px; opacity:0.85; }
+  .sidebar { position:fixed; top:var(--header-height); left:0; bottom:0; width:var(--sidebar-width); background:var(--primary); padding:16px 0; overflow-y:auto; z-index:99; }
+  .sidebar .nav-section { padding:8px 16px 4px; font-size:11px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.4); letter-spacing:1px; }
+  .sidebar .nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px; color:rgba(255,255,255,0.8); cursor:pointer; transition:all 0.2s; font-size:14px; border-left:3px solid transparent; }
+  .sidebar .nav-item:hover { background:rgba(255,255,255,0.1); color:white; }
+  .sidebar .nav-item.active { background:rgba(255,255,255,0.15); color:white; border-left-color:var(--accent); }
+  .sidebar .nav-item .badge { margin-left:auto; background:var(--accent); color:white; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; }
+  .main-content { margin-left:var(--sidebar-width); margin-top:var(--header-height); padding:24px; min-height:calc(100vh - var(--header-height)); }
+
+  /* ── CARDS & LAYOUT ── */
+  .page { display:none; }
+  .page.active { display:block; }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+  .page-header h2 { font-size:20px; font-weight:700; color:var(--primary); }
+  .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border:1px solid var(--border); }
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+  .stat-card { background:var(--card); border-radius:12px; padding:18px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border:1px solid var(--border); }
+  .stat-card .stat-value { font-size:28px; font-weight:700; color:var(--primary); }
+  .stat-card .stat-label { font-size:12px; color:var(--text-muted); margin-top:4px; }
+  .stat-card.accent .stat-value { color:var(--accent); }
+  .stat-card.success .stat-value { color:var(--success); }
+  .stat-card.danger .stat-value { color:var(--danger); }
+  .stat-card.info .stat-value { color:var(--info); }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:var(--bg); padding:10px 14px; text-align:left; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); border-bottom:2px solid var(--border); }
+  td { padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:hover td { background:rgba(0,0,0,0.02); }
+
+  /* ── BADGES ── */
+  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; }
+  .badge-pending { background:#fff3cd; color:#856404; }
+  .badge-quoted { background:#cce5ff; color:#004085; }
+  .badge-approved { background:#d4edda; color:#155724; }
+  .badge-ordered { background:#d1ecf1; color:#0c5460; }
+  .badge-delivered { background:#d4edda; color:#155724; }
+  .badge-cancelled { background:#f8d7da; color:#721c24; }
+  .badge-low { background:#f8d7da; color:#721c24; }
+  .badge-ok { background:#d4edda; color:#155724; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:white; border-radius:16px; width:90%; max-width:700px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+  .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); }
+  .modal-header h3 { font-size:18px; font-weight:700; color:var(--primary); }
+  .modal-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); line-height:1; }
+  .modal-body { padding:24px; }
+  .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+
+  /* ── FORM ELEMENTS ── */
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-row.three { grid-template-columns:1fr 1fr 1fr; }
+  .form-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+  .section-title { font-size:13px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:12px; }
+  .items-table { width:100%; border-collapse:collapse; margin-top:8px; }
+  .items-table th { background:var(--bg); padding:8px 10px; text-align:left; font-size:12px; color:var(--text-muted); font-weight:600; }
+  .items-table td { padding:6px 10px; border-bottom:1px solid var(--border); }
+  .items-table input, .items-table select { width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+  .add-item-btn { background:none; border:1.5px dashed var(--border); color:var(--text-muted); padding:8px; width:100%; border-radius:8px; cursor:pointer; margin-top:8px; font-size:13px; }
+  .add-item-btn:hover { border-color:var(--primary); color:var(--primary); }
+  .remove-item { background:none; border:none; color:var(--danger); cursor:pointer; font-size:16px; padding:2px 6px; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+  .filter-bar input, .filter-bar select { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; outline:none; background:white; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:var(--primary-light); }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:20px; }
+  .tab-btn { padding:10px 20px; background:none; border:none; font-size:14px; font-weight:600; color:var(--text-muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.2s; }
+  .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+  /* ── MISC ── */
+  .empty-state { text-align:center; padding:48px 20px; color:var(--text-muted); }
+  .empty-state .empty-icon { font-size:48px; margin-bottom:12px; }
+  .toast { position:fixed; bottom:24px; right:24px; background:var(--primary); color:white; padding:14px 20px; border-radius:10px; font-size:14px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.3); transform:translateY(100px); opacity:0; transition:all 0.3s; }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.success { background:var(--success); }
+  .toast.error { background:var(--danger); }
+  .loading { text-align:center; padding:24px; color:var(--text-muted); }
+  .text-right { text-align:right; }
+  .text-center { text-align:center; }
+  .mt-1 { margin-top:8px; } .mt-2 { margin-top:16px; } .mt-3 { margin-top:24px; }
+  .flex { display:flex; } .gap-2 { gap:8px; } .items-center { align-items:center; }
+  .text-muted { color:var(--text-muted); font-size:13px; }
+  .fw-bold { font-weight:700; }
+  @media (max-width:768px) {
+    .sidebar { transform:translateX(-100%); transition:transform 0.3s; }
+    .sidebar.open { transform:translateX(0); }
+    .main-content { margin-left:0; }
+    .form-row, .form-row.three { grid-template-columns:1fr; }
+    .stat-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="width:60px;height:60px;background:var(--primary);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+        <span style="font-size:28px;">🏢</span>
+      </div>
+      <h1>Fluent Living</h1>
+      <p>Procurement Management System</p>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="your@email.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <p class="error-msg" id="login-error">Invalid email or password</p>
+    <button class="btn btn-primary btn-full mt-2" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- Header -->
+  <header class="app-header">
+    <span style="font-size:22px;">🏢</span>
+    <span class="logo">Fluent Living Procurement</span>
+    <div class="header-right">
+      <span class="user-info" id="header-user"></span>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <!-- populated by JS -->
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page" id="page-dashboard">
+      <div class="page-header">
+        <h2>Dashboard</h2>
+        <span class="text-muted" id="dashboard-building"></span>
+      </div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="card">
+        <div class="section-title">Recent Purchase Orders</div>
+        <div class="table-wrap" id="recent-orders-table"></div>
+      </div>
+    </div>
+
+    <!-- ── NEW PURCHASE ORDER ── -->
+    <div class="page" id="page-new-po">
+      <div class="page-header">
+        <h2>New Purchase Request</h2>
+      </div>
+      <div class="card">
+        <div class="form-row" id="po-building-row" style="display:none;">
+          <div class="form-group">
+            <label>Building *</label>
+            <select id="po-building"></select>
+          </div>
+          <div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preferred Supplier (optional)</label>
+            <select id="po-supplier"><option value="">-- No preference --</option></select>
+          </div>
+          <div class="form-group">
+            <label>Notes / Special Instructions</label>
+            <input type="text" id="po-notes" placeholder="Any special requirements...">
+          </div>
+        </div>
+        <hr class="form-divider">
+        <div class="section-title">Items Requested</div>
+        <table class="items-table">
+          <thead><tr>
+            <th style="width:35%">Description *</th>
+            <th style="width:20%">Category</th>
+            <th style="width:12%">Qty *</th>
+            <th style="width:12%">Unit</th>
+            <th style="width:8%"></th>
+          </tr></thead>
+          <tbody id="po-items-body"></tbody>
+        </table>
+        <button class="add-item-btn" onclick="addPOItem()">+ Add Item</button>
+        <div class="modal-footer" style="padding:0;margin-top:20px;">
+          <button class="btn btn-outline" onclick="showPage('dashboard')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitPO()">Submit Purchase Request</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MY ORDERS / ALL ORDERS ── -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <h2 id="orders-page-title">Purchase Orders</h2>
+        <button class="btn btn-primary" onclick="showPage('new-po')"><span>+</span> New Request</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="orders-search" placeholder="Search PO number, building..." oninput="renderOrdersTable()">
+        <select id="orders-status-filter" onchange="renderOrdersTable()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="quoted">Quoted</option>
+          <option value="approved">Approved</option>
+          <option value="ordered">Ordered</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap" id="orders-table"></div>
+      </div>
+    </div>
+
+    <!-- ── SUPPLIERS ── -->
+    <div class="page" id="page-suppliers">
+      <div class="page-header">
+        <h2>Suppliers</h2>
+        <button class="btn btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="sup-search" placeholder="Search suppliers..." oninput="renderSuppliersTable()">
+        <select id="sup-cat-filter" onchange="renderSuppliersTable()"><option value="">All Categories</option></select>
+      </div>
+      <div class="card">
+        <div class="table-wrap" id="suppliers-table"></div>
+      </div>
+    </div>
+
+    <!-- ── INVENTORY ── -->
+    <div class="page" id="page-inventory">
+      <div class="page-header">
+        <h2>Stock & Inventory</h2>
+        <button class="btn btn-primary" onclick="openInventoryModal()">+ Add Item</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="inv-search" placeholder="Search items..." oninput="renderInventoryTable()">
+        <select id="inv-cat-filter" onchange="renderInventoryTable()"><option value="">All Categories</option></select>
+        <select id="inv-stock-filter" onchange="renderInventoryTable()">
+          <option value="">All Stock Levels</option>
+          <option value="low">Low Stock</option>
+          <option value="ok">OK</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap" id="inventory-table"></div>
+      </div>
+    </div>
+
+    <!-- ── USERS (admin) ── -->
+    <div class="page" id="page-users">
+      <div class="page-header">
+        <h2>Users & GMs</h2>
+        <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap" id="users-table"></div>
+      </div>
+    </div>
+
+    <!-- ── BUILDINGS (admin) ── -->
+    <div class="page" id="page-buildings">
+      <div class="page-header">
+        <h2>Buildings / Properties</h2>
+        <button class="btn btn-primary" onclick="openBuildingModal()">+ Add Building</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap" id="buildings-table"></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><h2>Settings</h2></div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchSettingsTab('general',this)">General</button>
+        <button class="tab-btn" onclick="switchSettingsTab('email',this)">Email Notifications</button>
+        <button class="tab-btn" onclick="switchSettingsTab('xero',this)">Xero Integration</button>
+        <button class="tab-btn" onclick="switchSettingsTab('password',this)">Change Password</button>
+      </div>
+      <div id="settings-tab-general" class="card">
+        <div class="section-title">General Settings</div>
+        <div class="form-row">
+          <div class="form-group"><label>Company Name</label><input type="text" id="s-company-name"></div>
+          <div class="form-group"><label>PO Number Prefix</label><input type="text" id="s-po-prefix" placeholder="FL-PO"></div>
+        </div>
+        <div class="form-group"><label>Notification Email</label><input type="email" id="s-notif-email" placeholder="procurement@company.com"></div>
+        <button class="btn btn-primary mt-2" onclick="saveGeneralSettings()">Save Settings</button>
+      </div>
+      <div id="settings-tab-email" class="card" style="display:none;">
+        <div class="section-title">SMTP Email Configuration</div>
+        <p class="text-muted mt-1" style="margin-bottom:16px;">Configure SMTP to enable email notifications when purchase orders are submitted.</p>
+        <div class="form-row">
+          <div class="form-group"><label>SMTP Host</label><input type="text" id="s-smtp-host" placeholder="smtp.gmail.com"></div>
+          <div class="form-group"><label>SMTP Port</label><input type="number" id="s-smtp-port" placeholder="587"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>SMTP Username</label><input type="text" id="s-smtp-user" placeholder="user@gmail.com"></div>
+          <div class="form-group"><label>SMTP Password</label><input type="password" id="s-smtp-pass" placeholder="••••••••"></div>
+        </div>
+        <div class="form-group"><label>From Address</label><input type="email" id="s-smtp-from" placeholder="procurement@fluentliving.com"></div>
+        <button class="btn btn-primary mt-2" onclick="saveEmailSettings()">Save Email Settings</button>
+      </div>
+      <div id="settings-tab-xero" class="card" style="display:none;">
+        <div class="section-title">Xero Integration</div>
+        <p class="text-muted mt-1" style="margin-bottom:16px;">Connect your Xero account to export Purchase Orders directly into Xero.</p>
+        <div id="xero-status"></div>
+        <div class="form-row mt-2">
+          <div class="form-group"><label>Xero Client ID</label><input type="text" id="s-xero-client-id" placeholder="Your Xero App Client ID"></div>
+          <div class="form-group"><label>Xero Client Secret</label><input type="password" id="s-xero-secret" placeholder="Your Xero App Client Secret"></div>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <button class="btn btn-primary" onclick="saveXeroConfig()">Save Xero Config</button>
+          <button class="btn btn-accent" onclick="connectXero()">Connect to Xero</button>
+        </div>
+        <div class="mt-3" style="background:var(--bg);padding:16px;border-radius:8px;font-size:13px;">
+          <strong>How to set up Xero:</strong><br>
+          1. Log in to <a href="https://developer.xero.com/myapps" target="_blank">developer.xero.com/myapps</a><br>
+          2. Create a new app → choose "Web app"<br>
+          3. Set redirect URI to: <code id="xero-redirect-uri"></code><br>
+          4. Copy the Client ID and Secret above and save<br>
+          5. Click "Connect to Xero" to authorise
+        </div>
+      </div>
+      <div id="settings-tab-password" class="card" style="display:none;">
+        <div class="section-title">Change Your Password</div>
+        <div class="form-group" style="max-width:360px;"><label>Current Password</label><input type="password" id="pw-current"></div>
+        <div class="form-group" style="max-width:360px;"><label>New Password</label><input type="password" id="pw-new"></div>
+        <div class="form-group" style="max-width:360px;"><label>Confirm New Password</label><input type="password" id="pw-confirm"></div>
+        <button class="btn btn-primary mt-2" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- PO Detail Modal -->
+<div class="modal-overlay" id="po-modal">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header">
+      <h3 id="po-modal-title">Purchase Order</h3>
+      <button class="modal-close" onclick="closeModal('po-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="po-modal-body"></div>
+    <div class="modal-footer" id="po-modal-footer"></div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal-overlay" id="supplier-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="supplier-modal-title">Supplier</h3>
+      <button class="modal-close" onclick="closeModal('supplier-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="s-id">
+      <div class="form-row">
+        <div class="form-group"><label>Supplier Name *</label><input type="text" id="s-name"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="s-category">
+            <option value="">Select category</option>
+            <option>Building & Maintenance</option><option>Equipment</option>
+            <option>Housekeeping & Cleaning</option><option>Linen & Bedding</option>
+            <option>Food & Beverage</option><option>Office Supplies</option>
+            <option>Guest Amenities</option><option>Safety & Security</option>
+            <option>IT & Technology</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Contact Person</label><input type="text" id="s-contact"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="s-email"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input type="text" id="s-phone"></div>
+        <div class="form-group"><label>Address</label><input type="text" id="s-address"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="s-notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('supplier-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory Modal -->
+<div class="modal-overlay" id="inventory-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="inv-modal-title">Inventory Item</h3>
+      <button class="modal-close" onclick="closeModal('inventory-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="inv-id">
+      <div class="form-row">
+        <div class="form-group"><label>Item Name *</label><input type="text" id="inv-name"></div>
+        <div class="form-group"><label>SKU / Code</label><input type="text" id="inv-sku"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><select id="inv-cat"></select></div>
+        <div class="form-group"><label>Supplier</label><select id="inv-supplier"><option value="">-- None --</option></select></div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group"><label>Current Stock</label><input type="number" id="inv-stock" min="0"></div>
+        <div class="form-group"><label>Min Stock Level</label><input type="number" id="inv-min-stock" min="0"></div>
+        <div class="form-group"><label>Unit Cost (R)</label><input type="number" id="inv-cost" step="0.01" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Unit</label>
+          <select id="inv-unit">
+            <option value="each">Each</option><option value="box">Box</option>
+            <option value="pack">Pack</option><option value="kg">kg</option>
+            <option value="litre">Litre</option><option value="roll">Roll</option>
+            <option value="pair">Pair</option><option value="set">Set</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Building (if specific)</label><select id="inv-building"><option value="">-- All Buildings --</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="inv-notes" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('inventory-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInventoryItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stock Adjustment Modal -->
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3>Adjust Stock</h3>
+      <button class="modal-close" onclick="closeModal('stock-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="stock-item-name" class="fw-bold mb-2"></p>
+      <input type="hidden" id="stock-item-id">
+      <div class="form-group">
+        <label>Adjustment (positive = add, negative = remove)</label>
+        <input type="number" id="stock-adj" placeholder="e.g. 10 or -5">
+      </div>
+      <div class="form-group"><label>Reason</label><input type="text" id="stock-reason" placeholder="Received delivery, used in room, etc."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('stock-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStockAdjustment()">Update Stock</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3 id="user-modal-title">User</h3>
+      <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="u-id">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="u-name"></div>
+        <div class="form-group"><label>Email *</label><input type="email" id="u-email"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Role *</label>
+          <select id="u-role" onchange="toggleBuildingField()">
+            <option value="gm">GM</option><option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group" id="u-building-group"><label>Building</label><select id="u-building"><option value="">-- None --</option></select></div>
+      </div>
+      <div class="form-group" id="u-password-group">
+        <label>Password <span class="text-muted" id="pw-hint">(leave blank to keep current)</span></label>
+        <input type="password" id="u-password" placeholder="••••••••">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('user-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Building Modal -->
+<div class="modal-overlay" id="building-modal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h3 id="building-modal-title">Building</h3>
+      <button class="modal-close" onclick="closeModal('building-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="b-id">
+      <div class="form-group"><label>Building Name *</label><input type="text" id="b-name"></div>
+      <div class="form-group"><label>Address</label><input type="text" id="b-address"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('building-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBuilding()">Save Building</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quote Modal -->
+<div class="modal-overlay" id="quote-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h3>Provide Quote</h3>
+      <button class="modal-close" onclick="closeModal('quote-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="q-po-id">
+      <div id="q-items-table"></div>
+      <hr class="form-divider">
+      <div class="form-row">
+        <div class="form-group"><label>Supplier *</label><select id="q-supplier"></select></div>
+        <div class="form-group"><label>Total Quote Amount (R) *</label><input type="number" id="q-amount" step="0.01" min="0"></div>
+      </div>
+      <div class="form-group"><label>Quote Notes</label><textarea id="q-notes" rows="3" placeholder="Delivery time, terms, etc."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('quote-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitQuote()">Save Quote</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let currentUser = null;
+let allOrders = [], allSuppliers = [], allInventory = [], allUsers = [], allBuildings = [], allCategories = [];
+
+// ════════════════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════════════════
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin' };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => el.className = 'toast', 3500);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+function fmt(n) { return n != null ? 'R ' + parseFloat(n).toLocaleString('en-ZA', {minimumFractionDigits:2}) : '—'; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'}) : '—'; }
+function statusBadge(s) { return `<span class="badge badge-${s}">${s}</span>`; }
+
+function switchSettingsTab(tab, btn) {
+  ['general','email','xero','password'].forEach(t => {
+    document.getElementById('settings-tab-'+t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'xero') loadXeroStatus();
+}
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+async function checkAuth() {
+  try {
+    currentUser = await api('GET', '/api/auth/me');
+    showApp();
+  } catch { showLogin(); }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  try {
+    currentUser = await api('POST', '/api/auth/login', { email, password });
+    showApp();
+  } catch(e) {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  await api('POST', '/api/auth/logout');
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+}
+
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function showLogin() {
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+async function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('header-user').textContent = currentUser.name + (currentUser.buildingName ? ' · ' + currentUser.buildingName : '');
+  buildSidebar();
+  await loadMasterData();
+  showPage('dashboard');
+}
+
+// ════════════════════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════════════════════
+function buildSidebar() {
+  const isAdmin = currentUser.role === 'admin';
+  const nav = [
+    { section: 'Main' },
+    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { id: 'orders', icon: '📋', label: isAdmin ? 'All Purchase Orders' : 'My Orders' },
+    { id: 'new-po', icon: '➕', label: 'New Request' },
+    { id: 'inventory', icon: '📦', label: 'Stock & Inventory' },
+    { id: 'suppliers', icon: '🏭', label: 'Suppliers' },
+  ];
+  if (isAdmin) {
+    nav.push({ section: 'Admin' });
+    nav.push({ id: 'users', icon: '👥', label: 'Users & GMs' });
+    nav.push({ id: 'buildings', icon: '🏢', label: 'Buildings' });
+    nav.push({ id: 'settings', icon: '⚙️', label: 'Settings' });
+  }
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = nav.map(n => {
+    if (n.section) return `<div class="nav-section">${n.section}</div>`;
+    return `<div class="nav-item" id="nav-${n.id}" onclick="showPage('${n.id}')">${n.icon} <span>${n.label}</span></div>`;
+  }).join('');
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-'+id);
+  if (pg) pg.classList.add('active');
+  const nav = document.getElementById('nav-'+id);
+  if (nav) nav.classList.add('active');
+  // Load page data
+  const loaders = {
+    'dashboard': loadDashboard,
+    'orders': loadOrders,
+    'new-po': initNewPO,
+    'suppliers': loadSuppliers,
+    'inventory': loadInventory,
+    'users': loadUsers,
+    'buildings': loadBuildings,
+    'settings': loadSettings,
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+// ════════════════════════════════════════════════════════
+// MASTER DATA
+// ════════════════════════════════════════════════════════
+async function loadMasterData() {
+  [allSuppliers, allBuildings, allCategories] = await Promise.all([
+    api('GET', '/api/suppliers'),
+    api('GET', '/api/buildings'),
+    api('GET', '/api/categories'),
+  ]);
+}
+
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+async function loadDashboard() {
+  const stats = await api('GET', '/api/dashboard/stats');
+  const orders = await api('GET', '/api/purchase-orders?limit=5');
+  allOrders = orders;
+
+  const isAdmin = currentUser.role === 'admin';
+  const grid = document.getElementById('stat-grid');
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-value">${stats.pending}</div><div class="stat-label">Pending</div></div>
+    <div class="stat-card info"><div class="stat-value">${stats.quoted}</div><div class="stat-label">Quoted</div></div>
+    <div class="stat-card success"><div class="stat-value">${stats.approved}</div><div class="stat-label">Approved</div></div>
+    <div class="stat-card accent"><div class="stat-value">${stats.delivered}</div><div class="stat-label">Delivered</div></div>
+    ${isAdmin ? `
+    <div class="stat-card"><div class="stat-value">${stats.buildings}</div><div class="stat-label">Buildings</div></div>
+    <div class="stat-card"><div class="stat-value">${stats.suppliers}</div><div class="stat-label">Suppliers</div></div>
+    <div class="stat-card danger"><div class="stat-value">${stats.low_stock}</div><div class="stat-label">Low Stock Items</div></div>
+    ` : ''}
+  `;
+
+  const recent5 = orders.slice(0, 8);
+  document.getElementById('recent-orders-table').innerHTML = recent5.length ? `
+    <table><thead><tr><th>PO Number</th><th>Building</th><th>Date</th><th>Status</th><th>Quote</th><th></th></tr></thead>
+    <tbody>${recent5.map(o => `
+      <tr>
+        <td class="fw-bold">${o.po_number}</td>
+        <td>${o.building_name || '—'}</td>
+        <td>${fmtDate(o.created_at)}</td>
+        <td>${statusBadge(o.status)}</td>
+        <td>${o.quote_amount ? fmt(o.quote_amount) : '—'}</td>
+        <td><button class="btn btn-sm btn-outline" onclick="viewPO(${o.id})">View</button></td>
+      </tr>`).join('')}
+    </tbody></table>` : '<div class="empty-state"><div class="empty-icon">📋</div><p>No purchase orders yet</p></div>';
+}
+
+// ════════════════════════════════════════════════════════
+// PURCHASE ORDERS
+// ════════════════════════════════════════════════════════
+async function loadOrders() {
+  allOrders = await api('GET', '/api/purchase-orders');
+  document.getElementById('orders-page-title').textContent = currentUser.role === 'admin' ? 'All Purchase Orders' : 'My Orders';
+  renderOrdersTable();
+}
+
+function renderOrdersTable() {
+  const search = document.getElementById('orders-search').value.toLowerCase();
+  const status = document.getElementById('orders-status-filter').value;
+  const filtered = allOrders.filter(o =>
+    (!search || o.po_number.toLowerCase().includes(search) || (o.building_name||'').toLowerCase().includes(search) || (o.requester_name||'').toLowerCase().includes(search)) &&
+    (!status || o.status === status)
+  );
+  const isAdmin = currentUser.role === 'admin';
+  document.getElementById('orders-table').innerHTML = filtered.length ? `
+    <table><thead><tr>
+      <th>PO Number</th>${isAdmin ? '<th>Building</th><th>Requested By</th>' : ''}
+      <th>Supplier</th><th>Items</th><th>Date</th><th>Status</th><th>Quote</th><th>Actions</th>
+    </tr></thead>
+    <tbody>${filtered.map(o => `<tr>
+      <td class="fw-bold">${o.po_number}</td>
+      ${isAdmin ? `<td>${o.building_name||'—'}</td><td>${o.requester_name||'—'}</td>` : ''}
+      <td>${o.supplier_name||'<em class="text-muted">TBD</em>'}</td>
+      <td>${o.items?.length||0} item${(o.items?.length||0)!==1?'s':''}</td>
+      <td>${fmtDate(o.created_at)}</td>
+      <td>${statusBadge(o.status)}</td>
+      <td>${o.quote_amount ? fmt(o.quote_amount) : '—'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="viewPO(${o.id})">View</button>
+        ${isAdmin && o.status==='pending' ? `<button class="btn btn-sm btn-accent" onclick="openQuoteModal(${o.id})" style="margin-left:4px;">Quote</button>` : ''}
+        ${isAdmin ? `<button class="btn btn-sm btn-primary" onclick="exportToXero(${o.id})" style="margin-left:4px;" title="Export to Xero">Xero</button>` : ''}
+      </td>
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty-state"><div class="empty-icon">📋</div><p>No orders found</p></div>';
+}
+
+async function viewPO(id) {
+  const po = await api('GET', `/api/purchase-orders/${id}`);
+  const isAdmin = currentUser.role === 'admin';
+  document.getElementById('po-modal-title').textContent = `Purchase Order — ${po.po_number}`;
+  document.getElementById('po-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div><span class="text-muted">Building</span><br><strong>${po.building_name||'—'}</strong></div>
+      <div><span class="text-muted">Status</span><br>${statusBadge(po.status)}</div>
+      <div><span class="text-muted">Requested By</span><br><strong>${po.requester_name||'—'}</strong></div>
+      <div><span class="text-muted">Date</span><br><strong>${fmtDate(po.created_at)}</strong></div>
+      <div><span class="text-muted">Supplier</span><br><strong>${po.supplier_name||'Not specified'}</strong></div>
+      <div><span class="text-muted">Quote Amount</span><br><strong>${po.quote_amount ? fmt(po.quote_amount) : 'Pending'}</strong></div>
+    </div>
+    ${po.notes ? `<div class="card" style="background:var(--bg);margin-bottom:16px;padding:12px;"><strong>Notes:</strong> ${po.notes}</div>` : ''}
+    ${po.quote_notes ? `<div class="card" style="background:#fff3cd;margin-bottom:16px;padding:12px;"><strong>Quote Notes:</strong> ${po.quote_notes}</div>` : ''}
+    <div class="section-title">Requested Items</div>
+    <table class="items-table" style="margin-top:8px;">
+      <thead><tr><th>#</th><th>Description</th><th>Category</th><th>Qty</th><th>Unit</th>${isAdmin ? '<th>Unit Price</th><th>Total</th>' : ''}</tr></thead>
+      <tbody>${po.items.map((it,i) => `<tr>
+        <td>${i+1}</td><td>${it.description}</td><td>${it.category||'—'}</td>
+        <td>${it.quantity}</td><td>${it.unit||'each'}</td>
+        ${isAdmin ? `<td>${it.unit_price ? fmt(it.unit_price) : '—'}</td><td>${it.total_price ? fmt(it.total_price) : '—'}</td>` : ''}
+      </tr>`).join('')}</tbody>
+    </table>
+    ${po.xero_invoice_id ? `<div class="mt-2 text-muted">✅ Exported to Xero: ${po.xero_invoice_id}</div>` : ''}
+  `;
+  const footer = document.getElementById('po-modal-footer');
+  footer.innerHTML = '';
+  if (isAdmin) {
+    if (po.status === 'pending') footer.innerHTML += `<button class="btn btn-accent" onclick="closeModal('po-modal');openQuoteModal(${po.id})">Provide Quote</button>`;
+    if (po.status === 'quoted') footer.innerHTML += `<button class="btn btn-success" onclick="updateStatus(${po.id},'approved')">Approve</button>`;
+    if (po.status === 'approved') footer.innerHTML += `<button class="btn btn-primary" onclick="updateStatus(${po.id},'ordered')">Mark as Ordered</button>`;
+    if (po.status === 'ordered') footer.innerHTML += `<button class="btn btn-success" onclick="updateStatus(${po.id},'delivered')">Mark as Delivered</button>`;
+    if (!po.xero_invoice_id && ['approved','ordered'].includes(po.status)) footer.innerHTML += `<button class="btn btn-outline" onclick="exportToXero(${po.id})">Export to Xero</button>`;
+  }
+  if (po.status === 'pending') footer.innerHTML += `<button class="btn btn-danger" onclick="cancelPO(${po.id})">Cancel</button>`;
+  footer.innerHTML += `<button class="btn btn-outline" onclick="closeModal('po-modal')">Close</button>`;
+  openModal('po-modal');
+}
+
+async function updateStatus(id, status) {
+  await api('PUT', `/api/purchase-orders/${id}/status`, { status });
+  closeModal('po-modal');
+  toast('Status updated', 'success');
+  loadOrders();
+}
+
+async function cancelPO(id) {
+  if (!confirm('Cancel this purchase order?')) return;
+  await api('PUT', `/api/purchase-orders/${id}/cancel`);
+  closeModal('po-modal');
+  toast('Order cancelled');
+  loadOrders();
+}
+
+// ── NEW PO ──
+let poItemCount = 0;
+function initNewPO() {
+  poItemCount = 0;
+  document.getElementById('po-items-body').innerHTML = '';
+  document.getElementById('po-notes').value = '';
+  // Fill suppliers
+  const sel = document.getElementById('po-supplier');
+  sel.innerHTML = '<option value="">-- No preference --</option>' + allSuppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  // Building selector for admin
+  if (currentUser.role === 'admin') {
+    document.getElementById('po-building-row').style.display = 'grid';
+    const bsel = document.getElementById('po-building');
+    bsel.innerHTML = '<option value="">-- Select Building --</option>' + allBuildings.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+  } else {
+    document.getElementById('po-building-row').style.display = 'none';
+  }
+  addPOItem();
+}
+
+function addPOItem() {
+  poItemCount++;
+  const tr = document.createElement('tr');
+  tr.id = `poi-${poItemCount}`;
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Item description" required></td>
+    <td><select>
+      <option value="">Category</option>
+      ${allCategories.map(c=>`<option>${c.name}</option>`).join('')}
+    </select></td>
+    <td><input type="number" value="1" min="1" style="width:70px;"></td>
+    <td><select><option value="each">Each</option><option value="box">Box</option><option value="pack">Pack</option><option value="kg">kg</option><option value="litre">Litre</option><option value="roll">Roll</option></select></td>
+    <td><button class="remove-item" onclick="this.closest('tr').remove()">✕</button></td>
+  `;
+  document.getElementById('po-items-body').appendChild(tr);
+}
+
+async function submitPO() {
+  const rows = document.querySelectorAll('#po-items-body tr');
+  if (rows.length === 0) return toast('Please add at least one item', 'error');
+  const items = Array.from(rows).map(r => {
+    const cells = r.querySelectorAll('input,select');
+    return { description: cells[0].value.trim(), category: cells[1].value, quantity: parseInt(cells[2].value)||1, unit: cells[3].value };
+  }).filter(i => i.description);
+  if (items.length === 0) return toast('Please fill in item descriptions', 'error');
+  const buildingId = currentUser.role === 'admin' ? document.getElementById('po-building').value : null;
+  if (currentUser.role === 'admin' && !buildingId) return toast('Please select a building', 'error');
+  try {
+    const result = await api('POST', '/api/purchase-orders', {
+      supplier_id: document.getElementById('po-supplier').value || null,
+      notes: document.getElementById('po-notes').value,
+      building_id: buildingId,
+      items
+    });
+    toast(`Purchase order ${result.po_number} submitted!`, 'success');
+    showPage('orders');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── QUOTE ──
+async function openQuoteModal(poId) {
+  const po = await api('GET', `/api/purchase-orders/${poId}`);
+  document.getElementById('q-po-id').value = poId;
+  document.getElementById('q-amount').value = po.quote_amount || '';
+  document.getElementById('q-notes').value = po.quote_notes || '';
+  const supSel = document.getElementById('q-supplier');
+  supSel.innerHTML = '<option value="">-- Select Supplier --</option>' + allSuppliers.map(s=>`<option value="${s.id}" ${po.supplier_id==s.id?'selected':''}>${s.name}</option>`).join('');
+  document.getElementById('q-items-table').innerHTML = `
+    <div class="section-title">Items</div>
+    <table class="items-table">
+      <thead><tr><th>Description</th><th>Qty</th><th>Unit Price (R)</th><th>Total (R)</th></tr></thead>
+      <tbody>${po.items.map(it=>`<tr>
+        <td>${it.description}</td><td>${it.quantity}</td>
+        <td><input type="number" step="0.01" min="0" id="qp-${it.id}" value="${it.unit_price||''}" oninput="calcQuoteTotal(${it.id},${it.quantity})" style="width:100px;"></td>
+        <td id="qt-${it.id}">${it.total_price ? fmt(it.total_price) : '—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  openModal('quote-modal');
+}
+
+function calcQuoteTotal(itemId, qty) {
+  const price = parseFloat(document.getElementById('qp-'+itemId).value) || 0;
+  document.getElementById('qt-'+itemId).textContent = fmt(price * qty);
+  // Auto-sum to quote amount
+  let total = 0;
+  document.querySelectorAll('[id^="qp-"]').forEach(el => {
+    const id = el.id.replace('qp-','');
+    const q = parseInt(el.closest('tr').querySelector('td:nth-child(2)').textContent) || 1;
+    total += (parseFloat(el.value)||0) * q;
+  });
+  document.getElementById('q-amount').value = total.toFixed(2);
+}
+
+async function submitQuote() {
+  const poId = document.getElementById('q-po-id').value;
+  const items = Array.from(document.querySelectorAll('[id^="qp-"]')).map(el => {
+    const id = el.id.replace('qp-','');
+    const qty = parseInt(el.closest('tr').querySelector('td:nth-child(2)').textContent)||1;
+    const price = parseFloat(el.value)||0;
+    return { id: parseInt(id), unit_price: price, total_price: price * qty };
+  });
+  await api('PUT', `/api/purchase-orders/${poId}/quote`, {
+    quote_amount: document.getElementById('q-amount').value,
+    quote_notes: document.getElementById('q-notes').value,
+    supplier_id: document.getElementById('q-supplier').value,
+    items
+  });
+  closeModal('quote-modal');
+  toast('Quote saved', 'success');
+  loadOrders();
+}
+
+// ── XERO EXPORT ──
+async function exportToXero(poId) {
+  try {
+    await api('POST', `/api/xero/export/${poId}`);
+    toast('Exported to Xero!', 'success');
+    loadOrders();
+  } catch(e) { toast('Xero export failed: ' + e.message, 'error'); }
+}
+
+// ════════════════════════════════════════════════════════
+// SUPPLIERS
+// ════════════════════════════════════════════════════════
+async function loadSuppliers() {
+  allSuppliers = await api('GET', '/api/suppliers?all=true');
+  // Populate category filter
+  const cats = [...new Set(allSuppliers.map(s=>s.category).filter(Boolean))].sort();
+  document.getElementById('sup-cat-filter').innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+  renderSuppliersTable();
+}
+
+function renderSuppliersTable() {
+  const search = document.getElementById('sup-search').value.toLowerCase();
+  const cat = document.getElementById('sup-cat-filter').value;
+  const filtered = allSuppliers.filter(s =>
+    (!search || s.name.toLowerCase().includes(search) || (s.contact_person||'').toLowerCase().includes(search)) &&
+    (!cat || s.category === cat)
+  );
+  const isAdmin = currentUser.role === 'admin';
+  document.getElementById('suppliers-table').innerHTML = filtered.length ? `
+    <table><thead><tr><th>Name</th><th>Category</th><th>Contact</th><th>Email</th><th>Phone</th><th>Status</th>${isAdmin?'<th>Actions</th>':''}</tr></thead>
+    <tbody>${filtered.map(s=>`<tr>
+      <td class="fw-bold">${s.name}</td>
+      <td>${s.category||'—'}</td>
+      <td>${s.contact_person||'—'}</td>
+      <td>${s.email ? `<a href="mailto:${s.email}">${s.email}</a>` : '—'}</td>
+      <td>${s.phone||'—'}</td>
+      <td><span class="badge ${s.active?'badge-approved':'badge-cancelled'}">${s.active?'Active':'Inactive'}</span></td>
+      ${isAdmin ? `<td><button class="btn btn-sm btn-outline" onclick="openSupplierModal(${s.id})">Edit</button></td>` : ''}
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty-state"><div class="empty-icon">🏭</div><p>No suppliers found</p></div>';
+}
+
+function openSupplierModal(id) {
+  const s = id ? allSuppliers.find(x=>x.id===id) : null;
+  document.getElementById('supplier-modal-title').textContent = s ? 'Edit Supplier' : 'Add Supplier';
+  document.getElementById('s-id').value = s?.id || '';
+  document.getElementById('s-name').value = s?.name || '';
+  document.getElementById('s-category').value = s?.category || '';
+  document.getElementById('s-contact').value = s?.contact_person || '';
+  document.getElementById('s-email').value = s?.email || '';
+  document.getElementById('s-phone').value = s?.phone || '';
+  document.getElementById('s-address').value = s?.address || '';
+  document.getElementById('s-notes').value = s?.notes || '';
+  openModal('supplier-modal');
+}
+
+async function saveSupplier() {
+  const id = document.getElementById('s-id').value;
+  const body = { name:document.getElementById('s-name').value, category:document.getElementById('s-category').value, contact_person:document.getElementById('s-contact').value, email:document.getElementById('s-email').value, phone:document.getElementById('s-phone').value, address:document.getElementById('s-address').value, notes:document.getElementById('s-notes').value, active:1 };
+  if (!body.name) return toast('Name required', 'error');
+  await api(id ? 'PUT' : 'POST', id ? `/api/suppliers/${id}` : '/api/suppliers', body);
+  closeModal('supplier-modal');
+  toast('Supplier saved', 'success');
+  await loadMasterData();
+  loadSuppliers();
+}
+
+// ════════════════════════════════════════════════════════
+// INVENTORY
+// ════════════════════════════════════════════════════════
+async function loadInventory() {
+  allInventory = await api('GET', '/api/inventory');
+  const cats = [...new Set(allInventory.map(i=>i.category_name).filter(Boolean))].sort();
+  document.getElementById('inv-cat-filter').innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+  renderInventoryTable();
+}
+
+function renderInventoryTable() {
+  const search = document.getElementById('inv-search').value.toLowerCase();
+  const cat = document.getElementById('inv-cat-filter').value;
+  const stock = document.getElementById('inv-stock-filter').value;
+  const filtered = allInventory.filter(i =>
+    (!search || i.name.toLowerCase().includes(search) || (i.sku||'').toLowerCase().includes(search)) &&
+    (!cat || i.category_name === cat) &&
+    (!stock || (stock==='low' ? i.current_stock<=i.min_stock&&i.min_stock>0 : i.current_stock>i.min_stock||i.min_stock===0))
+  );
+  const isAdmin = currentUser.role === 'admin';
+  document.getElementById('inventory-table').innerHTML = filtered.length ? `
+    <table><thead><tr><th>Item</th><th>SKU</th><th>Category</th><th>Supplier</th><th>Stock</th><th>Min</th><th>Unit Cost</th><th>Status</th>${isAdmin?'<th>Actions</th>':''}</tr></thead>
+    <tbody>${filtered.map(i=>{
+      const low = i.min_stock > 0 && i.current_stock <= i.min_stock;
+      return `<tr>
+        <td class="fw-bold">${i.name}</td>
+        <td>${i.sku||'—'}</td>
+        <td>${i.category_name||'—'}</td>
+        <td>${i.supplier_name||'—'}</td>
+        <td class="fw-bold ${low?'text-danger':''}">${i.current_stock} ${i.unit}</td>
+        <td>${i.min_stock||0}</td>
+        <td>${i.unit_cost ? fmt(i.unit_cost) : '—'}</td>
+        <td><span class="badge ${low?'badge-low':'badge-ok'}">${low?'Low Stock':'OK'}</span></td>
+        ${isAdmin ? `<td>
+          <button class="btn btn-sm btn-outline" onclick="openInventoryModal(${i.id})">Edit</button>
+          <button class="btn btn-sm btn-primary" onclick="openStockModal(${i.id},'${i.name.replace(/'/g,"\\'")}')" style="margin-left:4px;">Adjust</button>
+        </td>` : ''}
+      </tr>`;
+    }).join('')}
+    </tbody></table>` : '<div class="empty-state"><div class="empty-icon">📦</div><p>No inventory items</p></div>';
+}
+
+async function openInventoryModal(id) {
+  const item = id ? allInventory.find(x=>x.id===id) : null;
+  document.getElementById('inv-modal-title').textContent = item ? 'Edit Item' : 'Add Inventory Item';
+  document.getElementById('inv-id').value = item?.id || '';
+  document.getElementById('inv-name').value = item?.name || '';
+  document.getElementById('inv-sku').value = item?.sku || '';
+  document.getElementById('inv-stock').value = item?.current_stock ?? 0;
+  document.getElementById('inv-min-stock').value = item?.min_stock ?? 0;
+  document.getElementById('inv-cost').value = item?.unit_cost ?? 0;
+  document.getElementById('inv-notes').value = item?.notes || '';
+  // Categories
+  document.getElementById('inv-cat').innerHTML = '<option value="">-- None --</option>' + allCategories.map(c=>`<option value="${c.id}" ${item?.category_id==c.id?'selected':''}>${c.name}</option>`).join('');
+  // Suppliers
+  document.getElementById('inv-supplier').innerHTML = '<option value="">-- None --</option>' + allSuppliers.map(s=>`<option value="${s.id}" ${item?.supplier_id==s.id?'selected':''}>${s.name}</option>`).join('');
+  // Buildings
+  document.getElementById('inv-building').innerHTML = '<option value="">-- All Buildings --</option>' + allBuildings.map(b=>`<option value="${b.id}" ${item?.building_id==b.id?'selected':''}>${b.name}</option>`).join('');
+  document.getElementById('inv-unit').value = item?.unit || 'each';
+  openModal('inventory-modal');
+}
+
+async function saveInventoryItem() {
+  const id = document.getElementById('inv-id').value;
+  const body = { name:document.getElementById('inv-name').value, sku:document.getElementById('inv-sku').value, category_id:document.getElementById('inv-cat').value||null, supplier_id:document.getElementById('inv-supplier').value||null, unit:document.getElementById('inv-unit').value, current_stock:parseInt(document.getElementById('inv-stock').value)||0, min_stock:parseInt(document.getElementById('inv-min-stock').value)||0, unit_cost:parseFloat(document.getElementById('inv-cost').value)||0, building_id:document.getElementById('inv-building').value||null, notes:document.getElementById('inv-notes').value };
+  if (!body.name) return toast('Name required', 'error');
+  await api(id ? 'PUT' : 'POST', id ? `/api/inventory/${id}` : '/api/inventory', body);
+  closeModal('inventory-modal');
+  toast('Item saved', 'success');
+  loadInventory();
+}
+
+function openStockModal(id, name) {
+  document.getElementById('stock-item-id').value = id;
+  document.getElementById('stock-item-name').textContent = name;
+  document.getElementById('stock-adj').value = '';
+  document.getElementById('stock-reason').value = '';
+  openModal('stock-modal');
+}
+
+async function saveStockAdjustment() {
+  const id = document.getElementById('stock-item-id').value;
+  const adj = parseInt(document.getElementById('stock-adj').value);
+  if (isNaN(adj) || adj === 0) return toast('Enter a valid adjustment', 'error');
+  await api('PUT', `/api/inventory/${id}/stock`, { adjustment: adj, reason: document.getElementById('stock-reason').value });
+  closeModal('stock-modal');
+  toast('Stock updated', 'success');
+  loadInventory();
+}
+
+// ════════════════════════════════════════════════════════
+// USERS
+// ════════════════════════════════════════════════════════
+async function loadUsers() {
+  allUsers = await api('GET', '/api/users');
+  document.getElementById('users-table').innerHTML = allUsers.length ? `
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Building</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${allUsers.map(u=>`<tr>
+      <td class="fw-bold">${u.name}</td>
+      <td>${u.email}</td>
+      <td><span class="badge badge-${u.role==='admin'?'approved':'quoted'}">${u.role.toUpperCase()}</span></td>
+      <td>${u.building_name||'—'}</td>
+      <td><span class="badge ${u.active?'badge-approved':'badge-cancelled'}">${u.active?'Active':'Inactive'}</span></td>
+      <td><button class="btn btn-sm btn-outline" onclick="openUserModal(${u.id})">Edit</button></td>
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty-state"><p>No users</p></div>';
+}
+
+function openUserModal(id) {
+  const u = id ? allUsers.find(x=>x.id===id) : null;
+  document.getElementById('user-modal-title').textContent = u ? 'Edit User' : 'Add User';
+  document.getElementById('u-id').value = u?.id || '';
+  document.getElementById('u-name').value = u?.name || '';
+  document.getElementById('u-email').value = u?.email || '';
+  document.getElementById('u-role').value = u?.role || 'gm';
+  document.getElementById('u-password').value = '';
+  document.getElementById('pw-hint').style.display = u ? 'inline' : 'none';
+  document.getElementById('u-building').innerHTML = '<option value="">-- None --</option>' + allBuildings.map(b=>`<option value="${b.id}" ${u?.building_id==b.id?'selected':''}>${b.name}</option>`).join('');
+  toggleBuildingField();
+  openModal('user-modal');
+}
+
+function toggleBuildingField() {
+  const role = document.getElementById('u-role').value;
+  document.getElementById('u-building-group').style.display = role === 'gm' ? 'block' : 'none';
+}
+
+async function saveUser() {
+  const id = document.getElementById('u-id').value;
+  const pw = document.getElementById('u-password').value;
+  const body = { name:document.getElementById('u-name').value, email:document.getElementById('u-email').value, role:document.getElementById('u-role').value, building_id:document.getElementById('u-building').value||null, active:1 };
+  if (!body.name || !body.email) return toast('Name and email required', 'error');
+  if (!id && !pw) return toast('Password required for new users', 'error');
+  if (pw) body.password = pw;
+  await api(id ? 'PUT' : 'POST', id ? `/api/users/${id}` : '/api/users', body);
+  if (id && pw) await api('PUT', `/api/users/${id}/password`, { password: pw });
+  closeModal('user-modal');
+  toast('User saved', 'success');
+  loadUsers();
+}
+
+// ════════════════════════════════════════════════════════
+// BUILDINGS
+// ════════════════════════════════════════════════════════
+async function loadBuildings() {
+  allBuildings = await api('GET', '/api/buildings');
+  document.getElementById('buildings-table').innerHTML = allBuildings.length ? `
+    <table><thead><tr><th>Building Name</th><th>Address</th><th>Actions</th></tr></thead>
+    <tbody>${allBuildings.map(b=>`<tr>
+      <td class="fw-bold">${b.name}</td>
+      <td>${b.address||'—'}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="openBuildingModal(${b.id})">Edit</button></td>
+    </tr>`).join('')}
+    </tbody></table>` : '<div class="empty-state"><div class="empty-icon">🏢</div><p>No buildings added yet</p></div>';
+}
+
+function openBuildingModal(id) {
+  const b = id ? allBuildings.find(x=>x.id===id) : null;
+  document.getElementById('building-modal-title').textContent = b ? 'Edit Building' : 'Add Building';
+  document.getElementById('b-id').value = b?.id || '';
+  document.getElementById('b-name').value = b?.name || '';
+  document.getElementById('b-address').value = b?.address || '';
+  openModal('building-modal');
+}
+
+async function saveBuilding() {
+  const id = document.getElementById('b-id').value;
+  const body = { name:document.getElementById('b-name').value, address:document.getElementById('b-address').value };
+  if (!body.name) return toast('Building name required', 'error');
+  await api(id ? 'PUT' : 'POST', id ? `/api/buildings/${id}` : '/api/buildings', body);
+  closeModal('building-modal');
+  toast('Building saved', 'success');
+  await loadMasterData();
+  loadBuildings();
+}
+
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+async function loadSettings() {
+  const s = await api('GET', '/api/settings');
+  document.getElementById('s-company-name').value = s.company_name || '';
+  document.getElementById('s-po-prefix').value = s.po_prefix || '';
+  document.getElementById('s-notif-email').value = s.notification_email || '';
+  document.getElementById('s-smtp-host').value = s.smtp_host || '';
+  document.getElementById('s-smtp-port').value = s.smtp_port || '587';
+  document.getElementById('s-smtp-user').value = s.smtp_user || '';
+  document.getElementById('s-smtp-from').value = s.smtp_from || '';
+  document.getElementById('xero-redirect-uri').textContent = window.location.origin + '/api/xero/callback';
+  const xero = await api('GET', '/api/xero/config');
+  document.getElementById('s-xero-client-id').value = xero.client_id || '';
+}
+
+async function saveGeneralSettings() {
+  await api('PUT', '/api/settings', { company_name:document.getElementById('s-company-name').value, po_prefix:document.getElementById('s-po-prefix').value, notification_email:document.getElementById('s-notif-email').value });
+  toast('Settings saved', 'success');
+}
+
+async function saveEmailSettings() {
+  await api('PUT', '/api/settings', { smtp_host:document.getElementById('s-smtp-host').value, smtp_port:document.getElementById('s-smtp-port').value, smtp_user:document.getElementById('s-smtp-user').value, smtp_pass:document.getElementById('s-smtp-pass').value, smtp_from:document.getElementById('s-smtp-from').value });
+  toast('Email settings saved', 'success');
+}
+
+async function saveXeroConfig() {
+  await api('PUT', '/api/xero/config', { client_id:document.getElementById('s-xero-client-id').value, client_secret:document.getElementById('s-xero-secret').value });
+  toast('Xero config saved', 'success');
+}
+
+function connectXero() { window.location.href = '/api/xero/connect'; }
+
+async function loadXeroStatus() {
+  try {
+    const cfg = await api('GET', '/api/xero/config');
+    const connected = !!cfg.tenant_id;
+    document.getElementById('xero-status').innerHTML = connected
+      ? `<div class="card" style="background:#d4edda;padding:12px;margin-bottom:12px;">✅ Connected to Xero (Tenant: ${cfg.tenant_id})</div>`
+      : `<div class="card" style="background:#fff3cd;padding:12px;margin-bottom:12px;">⚠️ Not connected to Xero yet. Enter your credentials and click Connect.</div>`;
+  } catch {}
+}
+
+async function changePassword() {
+  const current = document.getElementById('pw-current').value;
+  const newPw = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+  if (!current || !newPw) return toast('Fill in all fields', 'error');
+  if (newPw !== confirm) return toast('Passwords do not match', 'error');
+  if (newPw.length < 8) return toast('Password must be at least 8 characters', 'error');
+  try {
+    await api('PUT', '/api/users/me/password', { current, newPassword: newPw });
+    toast('Password updated', 'success');
+    document.getElementById('pw-current').value = '';
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-confirm').value = '';
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// Handle Xero callback
+if (window.location.hash.includes('xero?connected=true')) { toast('Xero connected!', 'success'); }
+if (window.location.hash.includes('xero?error=true')) { toast('Xero connection failed', 'error'); }
+
+// Boot
+checkAuth();
+</script>
+</body>
+</html>
