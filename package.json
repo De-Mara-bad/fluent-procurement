@@ -4,16 +4,17 @@
   "description": "Fluent Living Procurement Management System",
   "main": "server.js",
   "scripts": {
-    "start": "node --experimental-sqlite server.js",
-    "dev": "node --experimental-sqlite server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "express": "4.18.2",
     "bcryptjs": "2.4.3",
     "express-session": "1.17.3",
-    "nodemailer": "6.9.9"
+    "nodemailer": "6.9.9",
+    "pg": "8.11.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=18.0.0"
   }
 }
